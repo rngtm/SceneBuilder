@@ -39,7 +39,7 @@ namespace EditorSceneBuilder
         {
             StreamReader reader = new StreamReader(tempFilePath, Encoding.GetEncoding("Shift_JIS"));
 
-            // スクリプト名を読み込み
+            // ファイル名を読み込み
             var json = reader.ReadLine();
 
             reader.Close();
@@ -62,19 +62,29 @@ namespace EditorSceneBuilder
             }
         }
 
+        static void BuildScene(TemporaryFileData file)
+        {
+            foreach (var data in file.DataArray)
+            {
+                BuildScene(data);
+            }
+        }
+
         /// <summary>
         /// シーンの構築
         /// </summary>
-        static void BuildScene(TemporaryFileData file)
+        static void BuildScene(TemporaryFileData.Data data)
         {
+            var scenePath = string.Format("{0}/{1}.unity", data.FolderPath, data.SceneName);
+            var scene = EditorSceneManager.GetSceneByName(data.SceneName);
+            EditorSceneManager.SetActiveScene(scene);
+
             // オブジェクトを作成してスクリプトをアタッチ
-            var newGameObject = new GameObject(string.Format("{0}Manager", file.SceneName));
-            newGameObject.AddComponent(file.MonoScript.GetClass());
+            var newGameObject = new GameObject(string.Format("{0}Manager", data.SceneName));
+            newGameObject.AddComponent(data.MonoScript.GetClass());
             newGameObject.transform.SetSiblingIndex(0);
 
             // シーンアセット 保存
-            var scenePath = string.Format("{0}/{1}.unity", file.FolderPath, file.SceneName);
-            var scene = EditorSceneManager.GetSceneByName(file.SceneName);
             EditorSceneManager.SaveScene(scene, scenePath);
             EditorSceneManager.CloseScene(scene, true);
             EditorUtility.ClearProgressBar();
@@ -83,7 +93,7 @@ namespace EditorSceneBuilder
             EditorApplication.delayCall += () =>
             EditorApplication.delayCall += () =>
             {
-                Debug.LogFormat("Create: {0}", file.FolderPath);
+                Debug.LogFormat("Create: {0}", data.FolderPath);
                 EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath(scenePath, typeof(UnityEngine.Object)));
             };
         }

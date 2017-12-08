@@ -49,7 +49,6 @@ namespace EditorSceneBuilder
 
             text = Regex.Replace(text, "#SCRIPTNAME#", fileNameWithoutExtension);
             text = Regex.Replace(text, "#NAMESPACE#", @namespace);
-            string text2 = Regex.Replace(fileNameWithoutExtension, " ", string.Empty);
 
             bool encoderShouldEmitUTF8Identifier = true;
             bool throwOnInvalidBytes = false;

@@ -5,6 +5,7 @@
 namespace EditorSceneBuilder
 {
     using UnityEditor;
+    using System.Collections.Generic;
 
     /// <summary>
     /// 一時ファイルのデータ
@@ -12,8 +13,25 @@ namespace EditorSceneBuilder
     [System.Serializable]
     public struct TemporaryFileData
     {
-        public string SceneName;
-        public string FolderPath;
-        public MonoScript MonoScript;
+        // public List<Data> DataList;
+        public Data[] DataArray;
+
+        public TemporaryFileData(Data data)
+        {
+            this.DataArray = new Data[] { data };
+        }
+
+        public TemporaryFileData(Data[] data)
+        {
+            this.DataArray = data;
+        }
+
+        [System.Serializable]
+        public struct Data
+        {
+            public string SceneName;
+            public string FolderPath;
+            public MonoScript MonoScript;
+        }
     }
 }
