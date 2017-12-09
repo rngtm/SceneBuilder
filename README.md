@@ -25,8 +25,22 @@ You can create Scene asset(.unity) and manager script(.cs) quickly.
 
 That's it!
 
-<img src = "./Demo/3_use.gif" width = 512>
+<img src = "./Demo/5_use.gif" width = 512>
 
+## Multiple Scene Construction
+You can build multiple scenes at once.<br>
+
+<img src = "./Demo/6_multiple_construction.png">
+
+
+<br>
+## How to
+Select "Tools/Scene Builder".<br>
+<img src ="./Demo/7_use.png" width = 320>
+
+<br>
+Editor window will open.<br>
+<img src ="./Demo/8_window.png" width = 320>
 
 License
 -------
