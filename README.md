@@ -32,8 +32,6 @@ You can build multiple scenes at once.<br>
 
 <img src = "./Demo/6_multiple_construction.png">
 
-
-<br>
 ## How to
 
 Select "Tools/Scene Builder".<br>
