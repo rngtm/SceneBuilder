@@ -18,28 +18,6 @@ namespace EditorSceneBuilder
 
     public class MainScript
     {
-        // /// <summary>
-        // /// JSONテスト
-        // /// </summary>
-        // [MenuItem("JsonTest/FromJson")]
-        // private static void TestJsonGet()
-        // {
-        //     var json = DataLoader.LoadScriptDependencyJson();
-        //     var dependency = JsonUtility.FromJson<ScriptDependency>(json);
-        //     GameObjectBuilder.BuildGameObjects(dependency);
-        // }
-
-        // /// <summary>
-        // /// JSONテスト
-        // /// </summary>
-        // [MenuItem("JsonTest/ToJson")]
-        // private static void TestJsonSet()
-        // {
-        //     var dependency = new ScriptDependency();
-        //     var json = JsonUtility.ToJson(dependency);
-        //     Debug.Log(json);
-        // }
-
         /// <summary>
         /// メニューから実行
         /// </summary>

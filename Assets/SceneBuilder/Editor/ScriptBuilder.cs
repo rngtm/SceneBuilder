@@ -66,7 +66,6 @@ namespace EditorSceneBuilder
             // 補正
             folderName = NameCorrector.CorrectNameIfInvalid(folderName);
             
-            // var scriptName = string.Format("{0}Manager.cs", folderName);
             var scriptPath = string.Format("{0}/{1}", folderPath, scriptName);
             var template =DataLoader.LoadScriptTemplate(templateName);
 
@@ -110,7 +109,6 @@ namespace EditorSceneBuilder
             AssetDatabase.ImportAsset(scriptPath);
             AssetDatabase.Refresh();
             
-            // Debug.LogFormat("scriptPath: {0}", scriptPath);
             return (MonoScript)AssetDatabase.LoadAssetAtPath(scriptPath, typeof(MonoScript));
         }
     }

@@ -30,11 +30,7 @@ namespace EditorSceneBuilder
         {
             public string SceneName;
             public string FolderPath;
-            // public MonoScript MonoScript;
-
-            // #warning TODO: 作成したScriptの代入処理
             public MonoScriptData[] Scripts;
-            // public MonoScript MonoScript { get { return this.Scripts[0]; } }
         }
     }
 }
