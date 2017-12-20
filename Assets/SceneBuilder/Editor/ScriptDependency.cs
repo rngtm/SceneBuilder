@@ -8,7 +8,9 @@ namespace EditorSceneBuilder
     using System.Collections.Generic;
     using UnityEngine;
 
-    [CreateAssetMenu]
+    /// <summary>
+    /// 生成オブジェクトや生成コンポーネントの定義
+    /// </summary>
     public class ScriptDependency : ScriptableObject
     {
         public List<ObjectData> DataList;
