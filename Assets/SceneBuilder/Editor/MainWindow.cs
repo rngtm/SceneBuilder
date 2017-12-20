@@ -38,7 +38,8 @@ namespace EditorSceneBuilder
             EditorGUI.BeginDisabledGroup(this.sceneNameList.Count == 0);
             if (GUILayout.Button("シーン作成", GUILayout.Height(32f)))
             {
-                MainScript.BuildSceneSets(this.sceneNameList.Select(d => d.SceneName).ToArray());
+                var sceneNames = this.sceneNameList.Select(d => d.SceneName).ToArray();
+                MainScript.DisplayBuildDialogMulti(sceneNames);
             }
             EditorGUI.EndDisabledGroup();
 

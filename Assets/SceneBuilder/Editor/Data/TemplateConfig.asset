@@ -12,4 +12,8 @@ MonoBehaviour:
   m_Name: TemplateConfig
   m_EditorClassIdentifier: 
   templateFile: {fileID: 4900000, guid: 2d20245834624ea429b8f10fa011621a, type: 3}
-  sceneAsset: {fileID: 102900000, guid: 85697df7a41a0b34b8117267e7b63b94, type: 3}
+  templateScripts:
+  - {fileID: 4900000, guid: 42c2f8cebb5a3d344aa21ccf8e51f0ca, type: 3}
+  - {fileID: 4900000, guid: 2d20245834624ea429b8f10fa011621a, type: 3}
+  scriptDependency: {fileID: 11400000, guid: 5b5275a881e43af4fba145eb2f8d135e, type: 2}
+  templateScene: {fileID: 102900000, guid: 85697df7a41a0b34b8117267e7b63b94, type: 3}

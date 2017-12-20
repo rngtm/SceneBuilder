@@ -13,7 +13,6 @@ namespace EditorSceneBuilder
     [System.Serializable]
     public struct TemporaryFileData
     {
-        // public List<Data> DataList;
         public Data[] DataArray;
 
         public TemporaryFileData(Data data)
@@ -31,7 +30,11 @@ namespace EditorSceneBuilder
         {
             public string SceneName;
             public string FolderPath;
-            public MonoScript MonoScript;
+            // public MonoScript MonoScript;
+
+            // #warning TODO: 作成したScriptの代入処理
+            public MonoScriptData[] Scripts;
+            // public MonoScript MonoScript { get { return this.Scripts[0]; } }
         }
     }
 }

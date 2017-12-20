@@ -1,0 +1,20 @@
+namespace #NAMESPACE#
+{
+    using System.Collections;
+    using System.Collections.Generic;
+    using UnityEngine;
+
+    // This is a Manager Class
+    public class #SCRIPTNAME# : MonoBehaviour 
+    {
+        [SerializeField] #SCENENAME#Canvas canvas;
+        
+        void Start ()
+        {
+        }
+
+        void Update () 
+        {
+        }
+    }
+}

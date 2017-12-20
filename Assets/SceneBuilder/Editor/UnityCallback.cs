@@ -6,12 +6,14 @@ namespace EditorSceneBuilder
 {
     using System.Collections;
     using System.Collections.Generic;
+    using System.Reflection;
     using UnityEngine;
     using UnityEditor;
     using UnityEditor.Callbacks;
     using UnityEditor.SceneManagement;
     using System;
     using System.IO;
+    using System.Linq;
     using System.Text;
 
     public static class UnityCallback
@@ -31,7 +33,7 @@ namespace EditorSceneBuilder
             // 一時ファイルを生成して情報を書き込んで保存
             File.WriteAllText(tempFilePath, json, Encoding.UTF8);
         }
-    
+
         /// <summary>
         /// 一時ファイル 取得
         /// </summary>
@@ -73,16 +75,72 @@ namespace EditorSceneBuilder
         /// <summary>
         /// シーンの構築
         /// </summary>
-        static void BuildScene(TemporaryFileData.Data data)
+        static void BuildScene(TemporaryFileData.Data temporaryData)
         {
-            var scenePath = string.Format("{0}/{1}.unity", data.FolderPath, data.SceneName);
-            var scene = EditorSceneManager.GetSceneByName(data.SceneName);
+            NamePostprocessor.Initialize(temporaryData.SceneName);
+
+            var scenePath = string.Format("{0}/{1}.unity", temporaryData.FolderPath, temporaryData.SceneName);
+            var scene = EditorSceneManager.GetSceneByName(temporaryData.SceneName);
             EditorSceneManager.SetActiveScene(scene);
 
-            // オブジェクトを作成してスクリプトをアタッチ
-            var newGameObject = new GameObject(string.Format("{0}Manager", data.SceneName));
-            newGameObject.AddComponent(data.MonoScript.GetClass());
-            newGameObject.transform.SetSiblingIndex(0);
+            // オブジェクトを作成
+            var scriptDependency = DataLoader.LoadScriptDependency();
+            var gameObjectDict = GameObjectBuilder.BuildGameObjects(scriptDependency)
+            .ToDictionary(gameObject => gameObject.name, g => g);
+
+            var scriptDict = temporaryData.Scripts.ToDictionary(script => script.RawComponentName, script => script);
+            var componentDict = new Dictionary<string, Component>();
+
+            // オブジェクトへスクリプトをアタッチ
+            foreach (var dependencyData in scriptDependency.DataList)
+            {
+                var gameObject = gameObjectDict[dependencyData.RawGameObjectName];
+
+                // dependencyに定義されているコンポーネントをアタッチ
+                foreach (var componentData in dependencyData.ComponentDataList)
+                {
+                    var rawComponentName = componentData.RawComponentName;
+                    var component = scriptDict[rawComponentName].Script.GetClass();
+                    var addComponent = gameObject.AddComponent(component);
+                    componentDict.Add(rawComponentName, addComponent); // 追加したコンポーネントを登録
+                }
+            }
+
+            // コンポーネントの参照関係の設定
+            foreach (var dependencyData in scriptDependency.DataList)
+            {
+                foreach (var componentData in dependencyData.ComponentDataList)
+                {
+                    foreach (var refData in componentData.ReferenceList)
+                    {
+                        // 参照先GameObject
+                        var refGameObject = gameObjectDict[refData.RawGameObjectName];
+
+                        // 参照先コンポーネント名
+                        var refComponentName = NamePostprocessor.Rename(refData.RawComponentName);
+
+                        // リフレクション経由で設定
+                        var refComponent = refGameObject.GetComponent(refComponentName);
+                        var component = componentDict[componentData.RawComponentName];
+
+                        var flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+                        var fields = component.GetType().GetFields(flags).Where(f => f != null);
+
+                        var field = fields.FirstOrDefault(f => f.FieldType.ToString().Contains(refComponentName));
+                        if (field != null)
+                        {
+                            // 値の設定
+                            field.SetValue(component, refComponent);
+                        }
+                    }
+                }
+            }
+
+            // GameObjectの名前修正
+            foreach (var item in gameObjectDict)
+            {
+                item.Value.name = NamePostprocessor.Rename(item.Value.name);
+            }
 
             // シーンアセット 保存
             EditorSceneManager.SaveScene(scene, scenePath);
@@ -93,7 +151,7 @@ namespace EditorSceneBuilder
             EditorApplication.delayCall += () =>
             EditorApplication.delayCall += () =>
             {
-                Debug.LogFormat("Create: {0}", data.FolderPath);
+                Debug.LogFormat("Create: {0}", temporaryData.FolderPath);
                 EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath(scenePath, typeof(UnityEngine.Object)));
             };
         }

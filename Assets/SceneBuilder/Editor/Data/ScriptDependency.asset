@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d41799211c5c424bb917e63a57bcfb2, type: 3}
+  m_Name: ScriptDependency
+  m_EditorClassIdentifier: 
+  DataList:
+  - RawGameObjectName: '#SCENENAME#Manager'
+    ComponentDataList:
+    - TemplateName: Manager
+      RawComponentName: '#SCENENAME#Manager'
+      ReferenceList:
+      - RawGameObjectName: '#SCENENAME#Canvas'
+        RawComponentName: '#SCENENAME#Canvas'
+  - RawGameObjectName: '#SCENENAME#Canvas'
+    ComponentDataList:
+    - TemplateName: Canvas
+      RawComponentName: '#SCENENAME#Canvas'
+      ReferenceList: []

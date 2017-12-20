@@ -18,13 +18,35 @@ namespace EditorSceneBuilder
 
     public class MainScript
     {
+        // /// <summary>
+        // /// JSONテスト
+        // /// </summary>
+        // [MenuItem("JsonTest/FromJson")]
+        // private static void TestJsonGet()
+        // {
+        //     var json = DataLoader.LoadScriptDependencyJson();
+        //     var dependency = JsonUtility.FromJson<ScriptDependency>(json);
+        //     GameObjectBuilder.BuildGameObjects(dependency);
+        // }
+
+        // /// <summary>
+        // /// JSONテスト
+        // /// </summary>
+        // [MenuItem("JsonTest/ToJson")]
+        // private static void TestJsonSet()
+        // {
+        //     var dependency = new ScriptDependency();
+        //     var json = JsonUtility.ToJson(dependency);
+        //     Debug.Log(json);
+        // }
+
         /// <summary>
         /// メニューから実行
         /// </summary>
         [MenuItem(Config.MENU_TEXT, false, Config.MENU_PRIORITY)]
         private static void BuildSceneFromMenu()
         {
-            BuildSceneSet("Assets");
+            DisplayBuildDialog("Assets");
         }
 
         /// <summary>
@@ -36,28 +58,31 @@ namespace EditorSceneBuilder
             string path = "";
             if (Selection.activeObject == null)
             {
-                BuildSceneSet("Assets");
+                DisplayBuildDialog("Assets");
             }
             else
             {
                 path = AssetDatabase.GetAssetPath(Selection.activeObject);
                 if (AssetDatabase.IsValidFolder(path))
                 {
-                    BuildSceneSet(path);
+                    DisplayBuildDialog(path);
                 }
                 else
                 if (AssetDatabase.IsMainAsset(Selection.activeObject))
                 {
-                    BuildSceneSet(Directory.GetParent(path).ToString());
+                    DisplayBuildDialog(Directory.GetParent(path).ToString());
                 }
             }
         }
 
         /// <summary>
-        /// 複数のシーン一式の作成
+        /// 複数シーン作成ダイアログ表示
         /// </summary>
-        public static void BuildSceneSets(string[] sceneNames)
+        public static void DisplayBuildDialogMulti(string[] sceneNames)
         {
+            // スクリプトの依存関係取得
+            var scriptDependency = DataLoader.LoadScriptDependency();
+
             // ダイアログを開く
             var fullpath = EditorUtility.SaveFolderPanel("シーン作成先のフォルダ選択", "Assets", "");
             string path = "Assets" + fullpath.Substring(Application.dataPath.Length);
@@ -66,43 +91,27 @@ namespace EditorSceneBuilder
             var corrctedSceneNames = sceneNames.Select(name => NameCorrector.CorrectNameIfInvalid(name)).ToArray();
             if (corrctedSceneNames.Length == 0) { return; }
 
+
             // 作成
             var dataList = new List<TemporaryFileData.Data>();
             float progressDelta = 1f / sceneNames.Length;
             float progress = 0f;
             foreach (var sceneName in corrctedSceneNames)
             {
-                // プログレスバー
+                    // プログレスバー
                 progress += progressDelta;
                 EditorUtility.DisplayProgressBar(string.Format("シーン\"{0}\"の作成中...", sceneName), "", progress);
 
                 if (string.IsNullOrEmpty(sceneName)) { continue; }
-                if (AssetChecker.Exists(Path.Combine(path, sceneName))) { continue; }
+                // if (AssetChecker.Exists(Path.Combine(path, sceneName))) { continue; }
 
-                // フォルダ作成
-                string rootFolderPath = FolderBuilder.BuildFolderSet(path, sceneName);
-                if (string.IsNullOrEmpty(rootFolderPath)) { continue; }
-
-                // シーンを開く            
-                var templateScene = DataLoader.LoadSceneTemplate();
-                EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(templateScene), OpenSceneMode.Additive);
-
-                // スクリプト作成
-                var rootFolderName = rootFolderPath.Split('/').Last();
-                var newScript = ScriptBuilder.CreateScriptAsset(rootFolderPath + "/" + Config.ScriptFolder, rootFolderName);
-
-                // シーンを保存
-                var scenePath = string.Format("{0}/{1}.unity", rootFolderPath, rootFolderName);
-                EditorSceneManager.SetActiveScene(EditorSceneManager.GetSceneByName(templateScene.name));
-                EditorSceneManager.SaveScene(EditorSceneManager.GetSceneByName(templateScene.name), scenePath);
-
-                dataList.Add(new TemporaryFileData.Data
+                bool success;
+                var data = TryBuildScene(Path.Combine(path, sceneName), out success);
+                if (success)
                 {
-                    SceneName = rootFolderName,
-                    FolderPath = rootFolderPath,
-                    MonoScript = newScript,
+                    dataList.Add(data);
+
                 }
-                );
             }
 
             // コンパイル終了時の処理 設定
@@ -112,9 +121,9 @@ namespace EditorSceneBuilder
         }
 
         /// <summary>
-        /// シーン一式の作成
+        /// シーン作成ダイアログ表示
         /// </summary>
-        public static void BuildSceneSet(string directory)
+        public static void DisplayBuildDialog(string directory)
         {
             // ダイアログを開く
             string fullpath = EditorUtility.SaveFilePanel("シーン作成先のフォルダ選択", directory, "", "");
@@ -124,28 +133,43 @@ namespace EditorSceneBuilder
             if (string.IsNullOrEmpty(path)) { return; }
             if (AssetChecker.Exists(path)) { return; }
 
+            // シーン作成
+            bool success;
+            var data = TryBuildScene(path, out success);
+            if (success)
+            {
+                UnityCallback.SetActionOnCompiled(new TemporaryFileData(data));
+            }
+        }
+
+        /// <summary>
+        /// シーンの作成
+        /// </summary>
+        /// <param name="path">作成先のファイルパス</param>
+        static TemporaryFileData.Data TryBuildScene(string path, out bool success)
+        {
+            if (AssetChecker.Exists(path))
+            {
+                Debug.LogFormat("Exist:{0}", path);
+                success = false;
+                return default(TemporaryFileData.Data);
+            }
+
             // フォルダ作成
             string rootFolderPath = FolderBuilder.BuildFolderSet(path);
-            if (string.IsNullOrEmpty(rootFolderPath)) { return; }
+            if (string.IsNullOrEmpty(rootFolderPath))
+            {
+                success = false;
+                return default(TemporaryFileData.Data);
+            }
 
             // シーンを開く            
             var templateScene = DataLoader.LoadSceneTemplate();
             EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(templateScene), OpenSceneMode.Additive);
 
-            // スクリプト作成
+            #warning TODO: JSONを取得してScriptDependencyからスクリプトを作成する
+            
             var rootFolderName = rootFolderPath.Split('/').Last();
-            var newScript = ScriptBuilder.CreateScriptAsset(rootFolderPath + "/" + Config.ScriptFolder, rootFolderName);
-
-            // コンパイル終了時の処理 設定
-            var file = new TemporaryFileData(
-                new TemporaryFileData.Data
-                {
-                    SceneName = rootFolderName,
-                    FolderPath = rootFolderPath,
-                    MonoScript = newScript,
-                }
-            );
-            UnityCallback.SetActionOnCompiled(file);
 
             // シーンを保存
             var scenePath = string.Format("{0}/{1}.unity", rootFolderPath, rootFolderName);
@@ -154,6 +178,21 @@ namespace EditorSceneBuilder
 
             // プログレスバー
             EditorUtility.DisplayProgressBar(string.Format("シーン\"{0}\"の作成中...", rootFolderName), "", 0f);
+            
+            // スクリプト作成
+            var scriptDependency = DataLoader.LoadScriptDependency();
+            var scripts = ScriptBuilder.BuildScripts(rootFolderPath + "/" + Config.ScriptFolder, rootFolderName, scriptDependency);
+
+            // コンパイル終了時の処理 設定
+            var data = new TemporaryFileData.Data
+            {
+                SceneName = rootFolderName,
+                FolderPath = rootFolderPath,
+                Scripts = scripts.ToArray(),
+            };
+
+            success = true;
+            return data;
         }
     }
 }

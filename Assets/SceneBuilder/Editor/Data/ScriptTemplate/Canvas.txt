@@ -3,7 +3,9 @@ namespace #NAMESPACE#
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
+    using UnityEngine.UI;
 
+    // This is a Canvas Class
     public class #SCRIPTNAME# : MonoBehaviour 
     {
         void Start ()

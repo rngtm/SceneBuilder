@@ -15,9 +15,13 @@ namespace EditorSceneBuilder
     public class TemplateConfig : ScriptableObject
     {
         [SerializeField, Header("テンプレートファイル")] private TextAsset templateFile;
-        [SerializeField, Header("SceneAsset")] private SceneAsset sceneAsset;
+        [SerializeField, Header("テンプレートスクリプト")] private TextAsset[] templateScripts;
+        [SerializeField, Header("スクリプトの依存関係JSONファイル")] private ScriptDependency scriptDependency;
+        [SerializeField, Header("テンプレートシーン")] private SceneAsset templateScene;
 
         public TextAsset TemplateFile { get { return this.templateFile; } }
-        public SceneAsset SceneAsset { get { return this.sceneAsset; } }
+        public TextAsset[] TemplateScripts { get { return this.templateScripts; } }
+        public SceneAsset TemplateScene { get { return this.templateScene; } }
+        public ScriptDependency ScriptDependency { get { return this.scriptDependency; } }
     }
 }

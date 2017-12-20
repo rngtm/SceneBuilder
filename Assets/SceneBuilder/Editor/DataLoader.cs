@@ -18,14 +18,23 @@ namespace EditorSceneBuilder
         /// <summary>
         /// スクリプトテンプレートのロード
         /// </summary>
-        public static TextAsset LoadScriptTemplate()
+        public static TextAsset LoadScriptTemplate(string templateName)
         {
-            return LoadConfig().TemplateFile;
+            return LoadConfig().TemplateScripts
+            .FirstOrDefault(template => template.name == templateName);
+        }
+
+        /// <summary>
+        /// スクリプト依存関係JSONの取得
+        /// </summary>
+        public static ScriptDependency LoadScriptDependency()
+        {
+            return LoadConfig().ScriptDependency;
         }
 
         public static SceneAsset LoadSceneTemplate()
         {
-            return LoadConfig().SceneAsset;
+            return LoadConfig().TemplateScene;
         }
 
         public static TemplateConfig LoadConfig()
