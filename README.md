@@ -42,6 +42,11 @@ Select "Tools/Scene Builder".<br>
 Editor window will open.<br>
 <img src ="./Demo/8_window.png" width = 320>
 
+## Script Dependency
+You can define Components and GameObjects in **ScriptDependency**.
+
+<img src = "./Demo/9_script_dependency.png">
+
 License
 -------
 The MIT License (MIT)
